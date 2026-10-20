@@ -1435,12 +1435,12 @@ input[type="range"]::-moz-range-thumb {
     padding: 25px 0;
   }
   .plot-person {
-    height: 29px;
+    height: 26px;
     font-size: 13px;
   }
   .plot-person .avatar {
-    width: 29px;
-    height: 29px;
+    width: 26px;
+    height: 26px;
     font-size: 9px;
   }
   .compact .plot-person {
@@ -1934,14 +1934,14 @@ input[type="range"]::-moz-range-thumb {
     left: calc(50% - 3px);
   }
   .compact .plot-person {
-    height: 21px;
+    height: 19px;
     font-size: 10px;
     justify-content: center;
     gap: 4px;
   }
   .compact .plot-person .avatar {
-    width: 21px;
-    height: 21px;
+    width: 19px;
+    height: 19px;
     font-size: 7px;
     border-width: 1px;
   }

@@ -107,6 +107,26 @@ test("1080p: all three groups fit without scrolling or overlapping portraits", a
     await page.screenshot({
       path: `test-results/group-${group + 1}-1080p.png`,
     });
+    if (layout.clipped)
+      console.log(
+        "Clipped portraits",
+        await page.locator(".plot-person").evaluateAll((elements) =>
+          elements
+            .map((el) => {
+              const rect = el.getBoundingClientRect();
+              const row = el
+                .closest(".presentation-spectrum")!
+                .getBoundingClientRect();
+              return {
+                name: el.textContent,
+                bottom: rect.bottom,
+                rowBottom: row.bottom,
+              };
+            })
+            .filter((item) => item.bottom > item.rowBottom),
+        ),
+      );
+
     expect(layout).toEqual({ overflow: false, overlap: false, clipped: false });
     if (group < 2)
       await page.getByRole("button", { name: "Next group" }).click();
