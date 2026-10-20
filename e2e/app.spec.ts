@@ -89,9 +89,19 @@ test("1080p: all three groups fit without scrolling or overlapping portraits", a
       return {
         overflow: container.scrollHeight > container.clientHeight,
         overlap,
-        clipped: chips.some(
-          (a) => a.bottom > innerHeight || a.right > innerWidth || a.left < 0,
-        ),
+        clipped: [...document.querySelectorAll(".plot-person")].some((el) => {
+          const a = el.getBoundingClientRect();
+          const row = el
+            .closest(".presentation-spectrum")!
+            .getBoundingClientRect();
+          return (
+            a.bottom > innerHeight ||
+            a.right > innerWidth ||
+            a.left < 0 ||
+            a.bottom > row.bottom ||
+            a.top < row.top
+          );
+        }),
       };
     });
     await page.screenshot({

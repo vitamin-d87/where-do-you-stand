@@ -1312,7 +1312,7 @@ function Presentation({
                 );
                 return (
                   <section
-                    className={`presentation-spectrum ${show ? "is-revealed" : ""} ${max > 4 ? "compact" : ""}`}
+                    className={`presentation-spectrum ${show ? "is-revealed" : ""} ${max > 3 ? "compact" : ""}`}
                     key={q.id}
                   >
                     <div className="spectrum-title">
