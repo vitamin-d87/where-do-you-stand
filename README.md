@@ -85,6 +85,8 @@ Use the editor OR `db push` for the initial migration, rather than applying it t
 
 The app deliberately uses a typed email code rather than a redirect link, avoiding conflicts between auth fragments and hash routing. Supabase controls OTP lifetime and email rate limits. Configure a suitable SMTP provider if the built-in email sender's limits or authorised recipient restrictions prevent delivery.
 
+The built-in Supabase mail service has a very small hourly allowance; account invitations and confirmation emails count towards it too. A rate-limit error means no new email was sent. Do not repeatedly resend. For regular email-code use, configure custom SMTP. Once signed in, open **Set a survey password** on the organiser dashboard to create an optional password for this app; later choose **Use a survey password instead**. This is separate from the password for the Supabase management dashboard. Passwords go directly to Supabase Auth and are never stored by the application.
+
 4. Add your user to the allowlist in the SQL Editor (replace the email):
 
 ```sql

@@ -43,6 +43,8 @@ import {
 import { api, supabase, demo, download, preparePhoto, resetDemo } from "./api";
 import { TeamTeethLogo } from "./TeamTeethLogo";
 import { SelfieCamera } from "./SelfieCamera";
+import { OrganiserPassword } from "./OrganiserPassword";
+import { signInError } from "./authErrors";
 import "./style.css";
 const base = () => location.origin + location.pathname + location.search;
 function useRoute() {
@@ -668,6 +670,8 @@ function Admin({ present }: { present: boolean }) {
   const [authorised, setAuthorised] = useState(demo);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordMode, setPasswordMode] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -742,10 +746,20 @@ function Admin({ present }: { present: boolean }) {
   async function login() {
     setBusy(true);
     setError("");
+    setNotice("");
     try {
-      if (sent) {
+      const address = email.trim().toLowerCase();
+      if (passwordMode) {
+        const { error } = await supabase!.auth.signInWithPassword({
+          email: address,
+          password,
+        });
+        if (error) throw error;
+        setPassword("");
+        await load();
+      } else if (sent) {
         const { error } = await supabase!.auth.verifyOtp({
-          email,
+          email: address,
           token: otp,
           type: "email",
         });
@@ -753,7 +767,7 @@ function Admin({ present }: { present: boolean }) {
         await load();
       } else {
         const { error } = await supabase!.auth.signInWithOtp({
-          email,
+          email: address,
           options: { shouldCreateUser: false },
         });
         if (error) throw error;
@@ -761,7 +775,7 @@ function Admin({ present }: { present: boolean }) {
         setNotice("Check your email for the sign-in code.");
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Sign-in failed");
+      setError(signInError(e));
     } finally {
       setBusy(false);
     }
@@ -783,8 +797,8 @@ function Admin({ present }: { present: boolean }) {
         <p className="eyebrow">FOR THE PERSON BRINGING EVERYONE TOGETHER</p>
         <h1>Organiser sign-in</h1>
         <p>
-          Use your allowlisted email address. We’ll send a code to keep things
-          simple.
+          Use the email authorised for this survey. Sign in with an email code,
+          or use a survey password if you have already set one.
         </p>
         <form
           onSubmit={(e) => {
@@ -803,7 +817,19 @@ function Admin({ present }: { present: boolean }) {
               onChange={(e) => setEmail(e.target.value)}
             />
           </label>
-          {sent && (
+          {passwordMode && (
+            <label className="field-label">
+              Survey password
+              <input
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </label>
+          )}
+          {sent && !passwordMode && (
             <label className="field-label">
               Email code
               <input
@@ -818,20 +844,50 @@ function Admin({ present }: { present: boolean }) {
           <ErrorBox message={error} />
           <p role="status">{notice}</p>
           <button className="primary" disabled={busy}>
-            {busy ? "Please wait…" : sent ? "Sign in" : "Email me a code"}{" "}
+            {busy
+              ? "Please wait…"
+              : sent || passwordMode
+                ? "Sign in"
+                : "Email me a code"}{" "}
             <ArrowRight size={17} />
           </button>
-          {sent && (
+          {sent && !passwordMode && (
             <button
               type="button"
               className="text-link"
               onClick={() => {
                 setSent(false);
                 setOtp("");
+                setNotice("");
+                setError("");
               }}
             >
               Use another email / resend
             </button>
+          )}
+          <button
+            type="button"
+            className="text-link"
+            disabled={busy}
+            onClick={() => {
+              setPasswordMode(!passwordMode);
+              setSent(false);
+              setOtp("");
+              setPassword("");
+              setNotice("");
+              setError("");
+            }}
+          >
+            {passwordMode
+              ? "Use an email code instead"
+              : "Use a survey password instead"}
+          </button>
+          {passwordMode && (
+            <p className="small muted">
+              This is the password set for this survey, which may differ from
+              your Supabase dashboard password. First-time organisers need an
+              email code; after signing in, you can set a survey password.
+            </p>
           )}
         </form>
       </main>
@@ -1167,6 +1223,7 @@ function Admin({ present }: { present: boolean }) {
           </button>
         </details>
       )}
+      {!demo && <OrganiserPassword />}
       {!demo && (
         <button className="text-link" onClick={() => supabase!.auth.signOut()}>
           <LogOut size={16} /> Sign out
