@@ -1,6 +1,6 @@
 # Where Do You Stand?
 
-A working React + TypeScript + Vite application for a small, in-person team session. A friendly phone survey feeds an organiser dashboard and a three-screen presentation. It is a conversation starter, **not a personality assessment**.
+A working React + TypeScript + Vite application for Team Teeth’s small, in-person team session. A friendly phone survey feeds an organiser dashboard and a three-screen presentation. It is a conversation starter, **not a personality assessment**.
 
 ## 1. Try the fictional demo first (five minutes)
 
@@ -21,7 +21,7 @@ With no environment variables, everything uses the demo. Eight fictional colleag
 
 You can submit a ninth fictional person, correct that entry without duplicating it, close/reopen the survey, remove entries, export CSV and download a QR code. Under **Demo testing** in the dashboard, simulate network/photo failures or restore the original eight people. All eight original people chose the same Curiosity position, deliberately testing collisions. Other questions have varied answers. Everyone has an initials avatar, exercising the no-photo path. You can add your own test photo through the survey.
 
-For a phone on the same Wi-Fi, use the Network URL printed by Vite. A phone camera may need HTTPS; the native file-picker camera option depends on device/browser support. Upload remains available. After deploying to GitHub Pages, use its HTTPS address for a realistic phone test. Do not use real colleagues' data in demo mode or on a development server.
+For a phone on the same Wi-Fi, use the Network URL printed by Vite. A phone camera may need HTTPS; the native file-picker camera option depends on device/browser support. The Take photo button opens an in-app live preview using the front-facing camera where available; the browser asks for camera permission. Participants can capture, retake and accept a selfie. Camera tracks stop on capture, cancel and closing the window. No microphone is requested. A denied or unavailable camera gives clear instructions and leaves Upload available. After deploying to GitHub Pages, use its HTTPS address for a realistic phone test. Do not use real colleagues' data in demo mode or on a development server.
 
 Even after Supabase is configured, add `?demo=1` **before** the hash to force a completely separate fictional demo: `https://USERNAME.github.io/REPOSITORY/?demo=1#/admin`. Demo data never enters Supabase.
 
@@ -30,6 +30,8 @@ Even after Supabase is configured, add `?demo=1` **before** the hash to force a 
 ```text
 src/
   App.tsx             Survey, organiser dashboard and presentation components
+  SelfieCamera.tsx     Camera permission, live preview, capture, retake and cleanup
+  TeamTeethLogo.tsx    Responsive SVG team of teeth logo
   api.ts              Demo adapter, Supabase API adapter, image preparation
   data.ts             Exact question wording, groups, demo data, chart calculations
   main.tsx            React entry point
@@ -46,6 +48,8 @@ supabase/
 ```
 
 The front end is static. It uses hash routes so GitHub Pages doesn't need URL rewriting. The only public configuration is the Supabase project URL and **publishable** key (`sb_publishable_…`). All elevated database and storage operations happen inside the Edge Function. There are no secret keys in the front end.
+
+The twelve question prompts in `data.ts` supply the main headings in the survey, review, organiser question catalogue, presentation and CSV export. The original spectrum endpoints and stable question IDs are preserved.
 
 Answers use integers **0–24** internally. The midpoint is 12. Presentation positions use `Math.round(answer / 4)`, giving seven bins with both endpoints and the midpoint preserved. Questions remain in their original order in the presentation and CSV. The participant shuffle is created once per tab/event, saved with the draft, and stays fixed when going back.
 
@@ -215,14 +219,14 @@ npx --yes deno check --node-modules-dir=manual supabase/functions/event-api/inde
 
 The automated tests cover data/wording, shuffling, missing responses, quantisation, all-eight stacking, computed insights, CSV escaping, survey navigation/review/submission/correction, concealed results, network/photo failures and demo duplicates/closure. PostgreSQL tests run the actual SQL migration inside PGlite, then check atomic replacement, duplicate names, invalid answers, expiry/invitations, central rate limiting and anonymous/authenticated permission denial. The tests mock Supabase's existing Auth/Storage schemas; they do not replace a live provider integration test.
 
-Optional actual-browser tests (provided, **not executed in the build environment**):
+Actual-browser tests (also run by GitHub Actions before deployment):
 
 ```bash
 npx playwright install chromium
 npm run test:e2e
 ```
 
-These exercise a 390×844 phone viewport and all three 1920×1080 presentation screens, checking page overflow and portrait rectangle collisions. Screenshots go to ignored `test-results/`. Check them visually, including a long display name, before the meeting. The actual browser/camera, live email delivery, deployed function, Storage/RLS policies and production scheduler still need verification in your own accounts.
+These exercise a 390×844 phone viewport and all three 1920×1080 presentation screens, checking page overflow, portrait rectangle collisions and containment within each spectrum. They verify the twelve question headings across views and camera capture/retake/save/close using a simulated camera, plus denied-permission recovery. They never access a real camera in CI. Screenshots go to ignored `test-results/`. Check them visually, including a long display name, before the meeting. The actual browser/camera, live email delivery, deployed function, Storage/RLS policies and production scheduler still need verification in your own accounts.
 
 Live security smoke checks after setup:
 
@@ -241,6 +245,6 @@ Live security smoke checks after setup:
 
 **You configure:** your GitHub repository/Pages settings; Supabase project, migration, allowlisted email/code template, Edge Function secrets/deployment; public front-end variables; and the cleanup workflow secret. No account has been connected or deployed on your behalf.
 
-**Verification limits:** DOM tests, PostgreSQL tests, lint, TypeScript/build and function type checking can be run locally. This delivery has not been tested against your Supabase project, email provider, physical phone, camera or projector. Actual-browser visual checks remain outstanding.
+**Verification limits:** DOM tests, PostgreSQL tests, lint, TypeScript/build and function type checking can be run locally. This delivery has not been tested against your Supabase project, email provider, physical phone, camera or projector. GitHub Actions verifies phone and projector layouts and simulated-camera behaviour; physical device/camera checks and live Supabase integration still need verification.
 
 **Possible second iteration:** movable crop positioning beyond centre/zoom, shared event ownership, multiple sessions per organiser, audit trail, a stricter CAPTCHA gateway if invitations are ever public, and an optional kiosk/presentation-only credential. The initial version intentionally uses one protected organiser session for the dashboard and presentation.

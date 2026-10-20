@@ -2,6 +2,7 @@ export type Question = {
   id: string;
   group: number;
   theme: string;
+  prompt: string;
   left: string;
   right: string;
 };
@@ -105,11 +106,26 @@ const endpoints = [
     "I love the final 10% — checking, refining and making everything just right",
   ],
 ];
+export const questionPrompts = [
+  "How do you like to build your knowledge?",
+  "How do you prefer to develop ideas?",
+  "When are you happy to take a decision?",
+  "Someone disagrees with something you've written - how do you prefer to deal with this?",
+  "What's your perfect weekend?",
+  "What's a more fulfilling interaction with colleagues?",
+  "How do you like to communicate when a colleague has a random question?",
+  "How do you like to receive feedback?",
+  "What's your approach to holiday planning?",
+  "When starting a project, what's your preference?",
+  "How do you like to collaborate on ideas and plans?",
+  "In a project, where do you think you're strongest?",
+];
 export const questions: Question[] = endpoints.map(
   ([theme, left, right], i) => ({
     id: `q${i + 1}`,
     group: Math.floor(i / 4),
     theme,
+    prompt: questionPrompts[i],
     left,
     right,
   }),
@@ -213,7 +229,7 @@ export function insight(people: Participant[], group: number) {
 export const csv = (people: Participant[]) =>
   "\ufeff" +
   [
-    ["Name", "Submitted at", ...questions.map((q) => q.theme)],
+    ["Name", "Submitted at", ...questions.map((q) => q.prompt)],
     ...people.map((p) => [
       p.name,
       p.created_at,

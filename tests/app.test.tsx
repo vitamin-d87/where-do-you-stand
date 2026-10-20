@@ -22,6 +22,10 @@ it("completes an unanswered survey, keeps the shuffle stable, submits and correc
   fireEvent.click(screen.getByLabelText(/happy to share/));
   fireEvent.click(screen.getByRole("button", { name: /On to the questions/ }));
   const first = screen.getByRole("slider").getAttribute("aria-label");
+  expect(questions.map((q) => q.prompt)).toContain(first);
+  expect(
+    screen.getByRole("heading", { name: first!, exact: true }),
+  ).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Next question/ })).toBeDisabled();
   fireEvent.click(screen.getByRole("button", { name: "A bit of both" }));
   fireEvent.click(screen.getByRole("button", { name: /Next question/ }));

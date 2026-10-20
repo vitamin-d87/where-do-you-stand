@@ -21,6 +21,14 @@ describe("Survey data and presentation", () => {
       "I love the final 10% — checking, refining and making everything just right",
     );
   });
+  it("has twelve distinct question prompts and includes them in CSV headings", () => {
+    expect(new Set(questions.map((q) => q.prompt)).size).toBe(12);
+    expect(questions[0].prompt).toBe(
+      "How do you like to build your knowledge?",
+    );
+    const header = csv([]);
+    for (const q of questions) expect(header).toContain(q.prompt);
+  });
   it("shuffles a copy, preserving every ID", () => {
     const source = questions.map((q) => q.id);
     const result = shuffle(source, () => 0.2);

@@ -9,7 +9,6 @@ import {
   ArrowRight,
   ArrowLeft,
   Check,
-  Camera,
   Upload,
   Users,
   SlidersHorizontal,
@@ -42,6 +41,8 @@ import {
   type EventInfo,
 } from "./data";
 import { api, supabase, demo, download, preparePhoto, resetDemo } from "./api";
+import { TeamTeethLogo } from "./TeamTeethLogo";
+import { SelfieCamera } from "./SelfieCamera";
 import "./style.css";
 const base = () => location.origin + location.pathname + location.search;
 function useRoute() {
@@ -56,12 +57,11 @@ function useRoute() {
 function Brand() {
   return (
     <a className="brand" href="#/">
-      <span className="brand-icon">
-        <i />
-        <i />
-        <i />
-      </span>{" "}
-      Where Do You Stand<span className="brand-q">?</span>
+      <TeamTeethLogo />
+      <span className="brand-wordmark">
+        Where Do You Stand<span className="brand-q">?</span>
+        <small>TEAM TEETH</small>
+      </span>
     </a>
   );
 }
@@ -160,6 +160,7 @@ function Survey({ route }: { route: string }) {
   const [file, setFile] = useState<File>();
   const [zoom, setZoom] = useState(1);
   const [photoBusy, setPhotoBusy] = useState(false);
+  const [cameraOpen, setCameraOpen] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     try {
@@ -396,18 +397,16 @@ function Survey({ route }: { route: string }) {
               <b>A face to go with your name?</b>
               <p>Optional. A clear selfie works beautifully.</p>
               <div className="photo-actions">
-                <label className="secondary">
-                  <Camera size={16} /> Take photo
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    capture="user"
-                    onChange={(e) => {
-                      setFile(e.target.files?.[0]);
-                      setZoom(1);
-                    }}
-                  />
-                </label>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => {
+                    setError("");
+                    setCameraOpen(true);
+                  }}
+                >
+                  Take photo
+                </button>
                 <label className="secondary">
                   <Upload size={16} /> Upload
                   <input
@@ -422,6 +421,17 @@ function Survey({ route }: { route: string }) {
               </div>
             </div>
           </div>
+          {cameraOpen && (
+            <SelfieCamera
+              onClose={() => setCameraOpen(false)}
+              onCapture={(photo) => {
+                setFile(photo);
+                setZoom(1);
+                setError("");
+                setCameraOpen(false);
+              }}
+            />
+          )}
           {draft.photo && !file && (
             <button
               className="text-link"
@@ -516,7 +526,7 @@ function Survey({ route }: { route: string }) {
                   className="review-item"
                   onClick={() => setStep(i)}
                 >
-                  <span>{item.theme}</span>
+                  <span>{item.prompt}</span>
                   <span className="mini-spectrum">
                     <i style={{ left: `${(draft.answers[id] / 24) * 100}%` }} />
                   </span>
@@ -550,8 +560,8 @@ function Survey({ route }: { route: string }) {
         q && (
           <section className="question-page" key={q.id}>
             <p className="eyebrow">{q.theme}</p>
-            <h1 ref={heading} tabIndex={-1}>
-              Where do you stand?
+            <h1 className="question-prompt" ref={heading} tabIndex={-1}>
+              {q.prompt}
             </h1>
             <p>Go with your instinct. Anywhere along the line is fine.</p>
             <div className="spectrum-endpoints" id="endpoints">
@@ -562,7 +572,7 @@ function Survey({ route }: { route: string }) {
               className={`slider-wrap ${draft.answers[q.id] === undefined ? "unanswered" : ""}`}
             >
               <input
-                aria-label={q.theme}
+                aria-label={q.prompt}
                 aria-describedby="endpoints slider-help"
                 aria-valuetext={
                   draft.answers[q.id] === undefined
@@ -1104,6 +1114,23 @@ function Admin({ present }: { present: boolean }) {
           </div>
         </>
       )}
+      <details className="panel question-catalogue">
+        <summary>
+          Survey questions <span>12 questions · 3 themes</span>
+        </summary>
+        {groups.map((group, index) => (
+          <section key={group.title}>
+            <h3>{group.title}</h3>
+            <ol start={index * 4 + 1}>
+              {questions
+                .filter((q) => q.group === index)
+                .map((q) => (
+                  <li key={q.id}>{q.prompt}</li>
+                ))}
+            </ol>
+          </section>
+        ))}
+      </details>
       {demo && (
         <details className="panel demo-testing">
           <summary>
@@ -1317,7 +1344,7 @@ function Presentation({
                   >
                     <div className="spectrum-title">
                       <span>0{qi + 1}</span>
-                      <h2>{q.theme}</h2>
+                      <h2>{q.prompt}</h2>
                     </div>
                     <div className="present-endpoints">
                       <span>{q.left}</span>
