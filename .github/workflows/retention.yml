@@ -1,0 +1,25 @@
+name: Delete expired event data
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cleanup:
+    if: vars.VITE_SUPABASE_URL != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run server-side retention cleanup
+        env:
+          API_URL: ${{ vars.VITE_SUPABASE_URL }}
+          PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          CLEANUP_SECRET: ${{ secrets.CLEANUP_SECRET }}
+        run: |
+          test -n "$CLEANUP_SECRET"
+          curl --fail-with-body --max-time 60 --retry 2 \
+            "$API_URL/functions/v1/event-api" \
+            -H "apikey: $PUBLISHABLE_KEY" \
+            -H "x-cleanup-secret: $CLEANUP_SECRET" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"cleanup"}'
