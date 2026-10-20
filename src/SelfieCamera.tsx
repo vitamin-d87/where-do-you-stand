@@ -77,8 +77,13 @@ export function SelfieCamera({
         }
       }
     }
-    void open();
+    // React's development Strict Mode mounts effects twice. Starting on the
+    // next task lets its first cleanup cancel the unused camera request.
+    const start = window.setTimeout(() => {
+      void open();
+    }, 0);
     return () => {
+      window.clearTimeout(start);
       cancelled = true;
       aliveRef.current = false;
       stop();
