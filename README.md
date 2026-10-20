@@ -55,7 +55,7 @@ Answers use integers **0–24** internally. The midpoint is 12. Presentation pos
 
 ## 3. Connect Supabase
 
-You will need your own Supabase project; none is connected to this source archive.
+The hosted Team Teeth site uses its configured Supabase project. The steps below explain how to reproduce that setup for a separate deployment. Never copy staff data between deployments.
 
 ### A. Create the project and apply the migration
 
@@ -150,7 +150,7 @@ The invitation is displayed only when generated; its hash is stored in the datab
 
 ## 4. Create the GitHub repository and deploy
 
-No GitHub connection was available when this project was prepared. Create a repository named, for example, `where-do-you-stand` in your own GitHub account. An empty repository is easiest; don't initialise it with a README. The archive contains all source, a lockfile and workflows, with no real participant data or credentials.
+The Team Teeth repository is deployed through GitHub Actions. For a separate deployment, create a repository named, for example, `where-do-you-stand` in your own GitHub account. An empty repository is easiest; don't initialise it with a README. The archive contains all source, a lockfile and workflows, with no real participant data or credentials.
 
 In a terminal in this project folder:
 
@@ -243,8 +243,8 @@ Live security smoke checks after setup:
 
 **Implemented:** full survey, optional selfie/upload and centre crop/zoom, stable randomisation, deliberate 25-position choices, review/correction, functional local demo, genuinely authenticated/allowlisted Supabase API, private photographs, protected dashboard, polling, CSV/QR, event controls, deletion/retention, three presentation groups, controlled reveal, notes, fullscreen/keyboard/reduced-motion support, insights, schema, tests and GitHub Actions.
 
-**You configure:** your GitHub repository/Pages settings; Supabase project, migration, allowlisted email/code template, Edge Function secrets/deployment; public front-end variables; and the cleanup workflow secret. No account has been connected or deployed on your behalf.
+**Hosted configuration:** GitHub Pages and the Supabase backend have been provisioned for the Team Teeth deployment. Public build variables select live mode; the separate `?demo=1` preview keeps fictional data local. Organiser access uses an allowlisted Auth account and emailed codes. The cleanup credential is stored only as encrypted server/Actions configuration. For a new deployment, follow sections 3–4.
 
-**Verification limits:** DOM tests, PostgreSQL tests, lint, TypeScript/build and function type checking can be run locally. This delivery has not been tested against your Supabase project, email provider, physical phone, camera or projector. GitHub Actions verifies phone and projector layouts and simulated-camera behaviour; physical device/camera checks and live Supabase integration still need verification.
+**Verification limits:** DOM tests, PostgreSQL tests, lint, TypeScript/build and function type checking can be run locally. Deployment checks include the live database permissions and unauthenticated API rejection. Physical phone, camera and projector checks still need to be performed by the organiser. GitHub Actions verifies phone and projector layouts and simulated-camera behaviour; physical device/camera checks and live Supabase integration still need verification.
 
 **Possible second iteration:** movable crop positioning beyond centre/zoom, shared event ownership, multiple sessions per organiser, audit trail, a stricter CAPTCHA gateway if invitations are ever public, and an optional kiosk/presentation-only credential. The initial version intentionally uses one protected organiser session for the dashboard and presentation.
