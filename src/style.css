@@ -1407,7 +1407,7 @@ input[type="range"]::-moz-range-thumb {
 @keyframes portrait-in {
   from {
     opacity: 0;
-    transform: translateY(-15px) scale(0.6);
+    transform: scale(0.6);
   }
   to {
     opacity: 1;

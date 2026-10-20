@@ -61,7 +61,15 @@ test("1080p: all three groups fit without scrolling or overlapping portraits", a
       .getByRole("button", { name: "Reveal results", exact: true })
       .click();
     await expect(page.locator(".plot-person")).toHaveCount(32);
-    await page.waitForTimeout(1000);
+    await page
+      .locator(".plot-person")
+      .evaluateAll((elements) =>
+        Promise.all(
+          elements
+            .flatMap((el) => el.getAnimations())
+            .map((animation) => animation.finished),
+        ),
+      );
     const layout = await page.evaluate(() => {
       const container = document.querySelector(".presentation")!;
       const chips = [...document.querySelectorAll(".plot-person")].map((el) =>
@@ -86,10 +94,10 @@ test("1080p: all three groups fit without scrolling or overlapping portraits", a
         ),
       };
     });
-    expect(layout).toEqual({ overflow: false, overlap: false, clipped: false });
     await page.screenshot({
       path: `test-results/group-${group + 1}-1080p.png`,
     });
+    expect(layout).toEqual({ overflow: false, overlap: false, clipped: false });
     if (group < 2)
       await page.getByRole("button", { name: "Next group" }).click();
   }
