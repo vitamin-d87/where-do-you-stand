@@ -8,10 +8,12 @@ if (!secret) throw Error("A current Supabase secret key is required.");
 const db = createClient(env("SUPABASE_URL"), String(secret), {
   auth: { persistSession: false, autoRefreshToken: false },
 });
-const origins = env("ALLOWED_ORIGINS")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
+// Exact additional origin for the neutral Team Teeth deployment. Existing
+// ALLOWED_ORIGINS values remain supported during the hosting transition.
+const origins = [
+  "https://team-teeth-stand.greentitan15.chatgpt.site",
+  ...env("ALLOWED_ORIGINS").split(",").map((s) => s.trim()),
+].filter(Boolean);
 const hash = async (s: string) =>
   Array.from(
     new Uint8Array(

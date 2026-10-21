@@ -1,5 +1,7 @@
 # Where Do You Stand?
 
+The neutral Team Teeth front end is now published at https://team-teeth-stand.greentitan15.chatgpt.site. It uses the existing Supabase project and organiser account. GitHub Pages remains a compatible previous address. The Sites source copy is managed through the Sites workflow; future front-end updates should be published there too.
+
 A working React + TypeScript + Vite application for Team Teeth’s small, in-person team session. A friendly phone survey feeds an organiser dashboard and a three-screen presentation. It is a conversation starter, **not a personality assessment**.
 
 ## 1. Try the fictional demo first (five minutes)
